@@ -20,6 +20,13 @@ var apiCache = {
 // Log the plate's launch
 notifyAPI("launch", 1);
 
+
+// Inform the API that the sensor is working
+setInterval(function(){
+    notifyAPI("keepalive", 1);
+}, 60*1000);
+
+
 // test noifications
 var light = getLight();
 notifyAPI("light", light);
@@ -69,6 +76,7 @@ function notifyAPI(msgType, value) {
     var deviceId = "123";
     var url = "http://example.com/api/" + deviceId + "/" + msgType + "/" + value;
 
+    console.log(url);
     http.get(url, function(res) {
       console.log("Response from API: " + res.statusCode);
     }).on('error', function(e) {
