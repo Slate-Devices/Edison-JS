@@ -2,6 +2,7 @@
 var http = require('http');
 var mraa = require('mraa');
 var jsUpmI2cLcd  = require ('jsupm_i2clcd'); // LED
+var lcd = new jsUpmI2cLcd.Jhd1313m1(0, 0x3E, 0x62); // Init the LCD
 var groveSensor = require('jsupm_grove'); // grove sensors
 var light = new groveSensor.GroveLight(1); // light sensor
 var upmMicrophone = require("jsupm_mic"); // gimme the mic calls
@@ -20,15 +21,22 @@ var apiCache = {
 notifyAPI("launch", 1);
 
 // test noifications
-notifyAPI("light", getLight());
-var noise = getNoise(10);
-if (noise)
-    notifyAPI("noise", noise);
+var light = getLight();
+notifyAPI("light", light);
+writeOnLED(0, "Light: " + light);
 
+var noise = getNoise(10);
+if (noise) {
+    notifyAPI("noise", noise);
+    writeOnLED(1, "Noise: " + noise);
+}
+else {
+    writeOnLED(1, "Zzzzzz...");
+}
 
 // returns amount of light
 function getLight() {
-    light.value();
+    return light.value();
 }
 
 // returns average amount of noise during a 200 ms interval
@@ -66,4 +74,17 @@ function notifyAPI(msgType, value) {
     }).on('error', function(e) {
       console.log("Error from API: " + e.message);
     });
+}
+
+// Writes text on the 0 or 1 rows of LED
+function writeOnLED(row, text) {
+    lcd.setCursor(row, 0);
+    
+    // A lazy way to clear old text that may be still
+    // on the screen
+    if (text.length < 16) {
+        text+="         ";
+    }
+    
+    lcd.write(text);
 }
