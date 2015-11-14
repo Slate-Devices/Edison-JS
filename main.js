@@ -5,6 +5,7 @@ var jsUpmI2cLcd  = require ('jsupm_i2clcd'); // LED
 var lcd = new jsUpmI2cLcd.Jhd1313m1(0, 0x3E, 0x62); // Init the LCD
 var groveSensor = require('jsupm_grove'); // grove sensors
 var light = new groveSensor.GroveLight(1); // light sensor
+var temp = new groveSensor.GroveTemp(2); // temperature
 var upmMicrophone = require("jsupm_mic"); // gimme the mic calls
 var myMic = new upmMicrophone.Microphone(0);
 var threshContext = new upmMicrophone.thresholdContext();
@@ -13,7 +14,8 @@ var threshContext = new upmMicrophone.thresholdContext();
 // amount of duplicate date to be sent again
 var apiCache = {
     "light": 0,
-    "noise": 0
+    "noise": 0,
+    "temp": 0
 };
 
 
@@ -29,10 +31,14 @@ setInterval(function(){
 
 // Ask sensors once per 1 second if anything is wrong
 setInterval(function(){
-    // test light
+    // light
     var light = getLight();
     notifyAPI("light", light);
     writeOnLED(0, "Light: " + light);
+    
+    // temperature
+    var temp = getTemp();
+    notifyAPI("temp", temp);
     
     // noise
     var noise = getNoise(10);
@@ -67,6 +73,12 @@ function getNoise(threshold) {
     }
 }
 
+// returns temperature in celsium
+function getTemp() {
+    return temp.value();
+}
+
+// notifies REST API with a set of predefined messages
 function notifyAPI(msgType, value) {
     // skip the call if the value to be sent is very close
     // to the value that we already sent recently
