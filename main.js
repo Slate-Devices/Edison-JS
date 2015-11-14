@@ -21,25 +21,30 @@ var apiCache = {
 notifyAPI("launch", 1);
 
 
-// Inform the API that the sensor is working
+// Inform the API that the thing is working
 setInterval(function(){
     notifyAPI("keepalive", 1);
 }, 60*1000);
 
 
-// test noifications
-var light = getLight();
-notifyAPI("light", light);
-writeOnLED(0, "Light: " + light);
+// Ask sensors once per 1 second if anything is wrong
+setInterval(function(){
+    // test light
+    var light = getLight();
+    notifyAPI("light", light);
+    writeOnLED(0, "Light: " + light);
+    
+    // noise
+    var noise = getNoise(10);
+    if (noise) {
+        notifyAPI("noise", noise);
+        writeOnLED(1, "Noise: " + noise);
+    }
+    else {
+        writeOnLED(1, "Zzzzzz...");
+    }
+}, 1*1000);
 
-var noise = getNoise(10);
-if (noise) {
-    notifyAPI("noise", noise);
-    writeOnLED(1, "Noise: " + noise);
-}
-else {
-    writeOnLED(1, "Zzzzzz...");
-}
 
 // returns amount of light
 function getLight() {
@@ -65,7 +70,7 @@ function getNoise(threshold) {
 function notifyAPI(msgType, value) {
     // skip the call if the value to be sent is very close
     // to the value that we already sent recently
-    if (apiCache[msgType]) {
+    if (msgType in apiCache) {
         if (Math.abs(apiCache[msgType] - value) < 5)
             return;
         // update cache
