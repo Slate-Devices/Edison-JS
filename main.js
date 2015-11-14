@@ -8,6 +8,13 @@ var upmMicrophone = require("jsupm_mic"); // gimme the mic calls
 var myMic = new upmMicrophone.Microphone(0);
 var threshContext = new upmMicrophone.thresholdContext();
 
+// store last values that we sent to API to reduce
+// amount of duplicate date to be sent again
+var apiCache = {
+    "light": 0,
+    "noise": 0
+};
+
 
 // Log the plate's launch
 notifyAPI("launch", 1);
@@ -41,6 +48,15 @@ function getNoise(threshold) {
 }
 
 function notifyAPI(msgType, value) {
+    // skip the call if the value to be sent is very close
+    // to the value that we already sent recently
+    if (apiCache[msgType]) {
+        if (Math.abs(apiCache[msgType] - value) < 5)
+            return;
+        // update cache
+        apiCache[msgType] = value;
+    }
+    
     // Yes, it is hardcoded, baby!
     var deviceId = "123";
     var url = "http://example.com/api/" + deviceId + "/" + msgType + "/" + value;
