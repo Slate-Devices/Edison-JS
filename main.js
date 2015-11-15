@@ -90,16 +90,27 @@ function notifyAPI(msgType, value) {
     }
     
     // Yes, it is hardcoded, baby!
-    var deviceId = "123";
-    var url = "http://example.com/api/" + deviceId + "/" + msgType + "/" + value;
+    var deviceId = "1";
+    var url = "http://146.148.120.81/api/" + deviceId + "/" + msgType + "/" + value;
 
     console.log(url);
-    http.get(url, function(res) {
-      console.log("Response from API: " + res.statusCode);
-    }).on('error', function(e) {
-      console.log("Error from API: " + e.message);
-    });
+    try {
+        http.get(url, function(res) {
+          //console.log("Response from API: " + res.statusCode);
+        }).on('error', function(e) {
+          console.log("Error from API: " + e.message);
+        });
+    }
+    catch (e) {
+        console.log("HTTP error");
+    }
 }
+
+// Handling async HTTP errors
+// http://stackoverflow.com/questions/4328540/how-to-catch-http-client-request-exceptions-in-node-js
+process.on('uncaughtException', function (err) {
+    console.log(err);
+});
 
 // Writes text on the 0 or 1 rows of LED
 function writeOnLED(row, text) {
