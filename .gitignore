@@ -1,2 +1,12 @@
 *.xdke
 xdk/*
+
+# NPM
+node_modules/
+
+# Vim Artifacts
+*.swp
+*.swo
+
+# Mac Artifacts
+.DS_Store
